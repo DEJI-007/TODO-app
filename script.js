@@ -1,6 +1,7 @@
 // Retrieve todo from local storage or initialize an empty array
 let todo = JSON.parse(localStorage.getItem("todo")) || [];
 const todoInput = document.getElementById("todoInput");
+const datetimeInput = document.getElementById("datetimeInput");
 const todoList = document.getElementById("todoList");
 const todoCount = document.getElementById("todoCount");
 const addButton = document.querySelector(".btn");
@@ -20,37 +21,55 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function addTask() {
-  const newTask = todoInput.value.trim();
-  if (newTask !== "") {
-    todo.push({ text: newTask, disabled: false });
-    saveToLocalStorage();
-    todoInput.value = "";
-    displayTasks();
+    const newTask = todoInput.value.trim();
+    const dateTime = datetimeInput.value;
+  
+    if (newTask !== "") {
+      todo.push({
+        text: newTask,
+        datetime: dateTime,
+        disabled: false
+      });
+      saveToLocalStorage();
+      todoInput.value = "";
+      datetimeInput.value = "";
+      displayTasks();
+    }
   }
-}
 
 function displayTasks() {
-  todoList.innerHTML = "";
-  todo.forEach((item, index) => {
-    const p = document.createElement("p");
-    p.innerHTML = `
-      <div class="todo-container">
-        <input type="checkbox" class="todo-checkbox" id="input-${index}" ${
-      item.disabled ? "checked" : ""
-    }>
-        <p id="todo-${index}" class="${
-      item.disabled ? "disabled" : ""
-    }" onclick="editTask(${index})">${item.text}</p>
-      </div>
-    `;
-    p.querySelector(".todo-checkbox").addEventListener("change", () =>
-      toggleTask(index)
-    );
-    todoList.appendChild(p);
-  });
-  todoCount.textContent = todo.length;
-}
-
+    todoList.innerHTML = "";
+  
+    todo.forEach((item, index) => {
+      const li = document.createElement("li");
+  
+      const dateTimeDisplay = item.datetime
+        ? `<small class="datetime">${new Date(item.datetime).toLocaleString()}</small>`
+        : "";
+  
+      li.innerHTML = `
+        <div class="todo-container">
+          <input type="checkbox" class="todo-checkbox" id="input-${index}" ${
+            item.disabled ? "checked" : ""
+          }>
+          <div>
+            <p id="todo-${index}" class="${item.disabled ? "disabled" : ""}" onclick="editTask(${index})">
+              ${item.text}
+            </p>
+            ${dateTimeDisplay}
+          </div>
+        </div>
+      `;
+  
+      li.querySelector(".todo-checkbox").addEventListener("change", () =>
+        toggleTask(index)
+      );
+  
+      todoList.appendChild(li);
+    });
+  
+    todoCount.textContent = todo.length;
+  }
 function editTask(index) {
   const todoItem = document.getElementById(`todo-${index}`);
   const existingText = todo[index].text;
